@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output, Input } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Product, ProductInsert, ProductUpdate } from '../../Models/product';
 import { OverlayModule } from 'primeng/overlay';
@@ -11,12 +11,11 @@ import { OverlayModule } from 'primeng/overlay';
   templateUrl: './product-create-edit.component.html',
   styleUrl: './product-create-edit.component.scss'
 })
-export class ProductCreateEditComponent implements OnInit {
+export class ProductCreateEditComponent {
 
   @Output() onSubmit = new EventEmitter<ProductInsert | ProductUpdate>();
-  @Output() onCancel = new EventEmitter();
 
-  @Input() productData: Product | null = null;
+  productData: Product | null = null;
   isActive: boolean = false;
 
   newProduct: ProductInsert = {
@@ -36,16 +35,27 @@ export class ProductCreateEditComponent implements OnInit {
     quantity: 0,
   };
 
-  ngOnInit() {
-    this.initializeForm();
-  }
+  // ngOnInit() {
+  //   this.initializeForm();
+  // }
 
+  show(product? : Product){
+    if(product){
+      this.productData = product;
+    }
+    else{
+      this.productData = null;
+    }
+    // this.productData = product ?? null;
+    this.initializeForm();
+    this.isActive = true;
+  }
 
   initializeForm() {
     if (this.productData) {
       this.editProduct = {
-        id: this.productData.id,
-        pricePerUnit: this.productData.pricePerUnit,
+        id: this.productData.id || 0,
+        pricePerUnit: this.productData.pricePerUnit || 0,
         status: this.productData.status,
         quantity: this.productData.quantity
       };
@@ -82,10 +92,11 @@ export class ProductCreateEditComponent implements OnInit {
       }
       this.onSubmit.emit(this.newProduct);
     }
+    this.isActive = false;
   }
 
   cancelForm() {
-    this.onCancel.emit();
+    this.isActive = false;
   }
 
 }

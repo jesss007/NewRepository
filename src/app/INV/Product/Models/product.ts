@@ -17,7 +17,7 @@ export interface Product {
 }
 
 export interface ProductFilter {
-  name : string
+  name? : string
 }
 
 export interface ProductInsert{

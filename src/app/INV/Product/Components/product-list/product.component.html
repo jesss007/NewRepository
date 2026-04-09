@@ -1,23 +1,17 @@
 <div class="page">
     <div class="header">
         <h1> Products </h1>
-        <p-button label="Create Product" (onClick)="onCreate()" />
+        <p-button label="Create Product" (onClick)="productcreateedit.show()" />
 
     </div>
 
     <div>
         <input pInputText placeholder="Search by name" [(ngModel)]="filter.name" />
         <p-button label="Search" (onClick)="onFilter()" />
-        <p-button label ="Clear" severity="secondary" (onClick)="onClearFilter()" />
+        <p-button label="Clear" severity="secondary" (onClick)="onClearFilter()" />
     </div>
 
-    <product-create-edit #pce 
-        *ngIf="showModal" 
-        [productData]="selectedProduct" 
-        (onSubmit)="onSubmit($event)"
-        (onCancel)="onCancel()">
-    </product-create-edit>
-    
+
     <p-table [value]="products">
         <ng-template pTemplate="header">
             <tr>
@@ -41,14 +35,14 @@
                         : product.status === 2 ? 'outOfStock' 
                         :'discontinued'">
                         {{ product.status === 1 ? 'In Stock'
-                        :  product.status === 2 ? 'Out of Stock'
-                        :  'Discontinued' }}
+                        : product.status === 2 ? 'Out of Stock'
+                        : 'Discontinued' }}
                     </span>
                 </td>
                 <td>{{product.quantity}}</td>
                 <td>{{product.productCode}}</td>
                 <td>
-                    <p-button label="Edit" (onClick)="onEdit(product)" />
+                    <p-button label="Edit" (onClick)="productcreateedit.show(product)" />
                     <p-button label="Delete" severity="danger" (onClick)="onDelete(product)" />
                 </td>
 
@@ -73,4 +67,9 @@
 
     </div>
 
+
+
 </div>
+
+<product-create-edit #productcreateedit (onSubmit)="onSubmit($event)">
+</product-create-edit>
