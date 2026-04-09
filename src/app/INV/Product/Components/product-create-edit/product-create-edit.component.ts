@@ -1,24 +1,32 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Product, ProductInsert, ProductUpdate } from '../../Models/product';
 import { OverlayModule } from 'primeng/overlay';
+import { Subject, takeUntil } from 'rxjs';
+import { ApiResponse } from '../../../../shared/Models/response-model';
+import { ProductService } from '../../Services/product.service';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'product-create-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, OverlayModule],
+  imports: [CommonModule, FormsModule, OverlayModule, ToastModule],
   templateUrl: './product-create-edit.component.html',
-  styleUrl: './product-create-edit.component.scss'
+  styleUrls: ['./product-create-edit.component.scss']
 })
-export class ProductCreateEditComponent {
+export class ProductCreateEditComponent implements OnInit, OnDestroy{
 
-  @Output() onSubmit = new EventEmitter<ProductInsert | ProductUpdate>();
+  private destroy = new Subject<void>();
+
+  @Output() onSubmitted = new EventEmitter<Product>();
 
   productData: Product | null = null;
   isActive: boolean = false;
 
-  newProduct: ProductInsert = {
+  product = {
+    id : 0,
     name: '',
     description: '',
     pricePerUnit: 0,
@@ -28,75 +36,85 @@ export class ProductCreateEditComponent {
     createdBy: 1
   };
 
-  editProduct: ProductUpdate = {
-    id: 0,
-    pricePerUnit: 0,
-    status: 1,
-    quantity: 0,
-  };
+  constructor (
+    private productService : ProductService,
+    private messageService : MessageService   
+  ){}
 
-  // ngOnInit() {
-  //   this.initializeForm();
-  // }
+  ngOnInit() {
+   
+  }
 
   show(product? : Product){
-    if(product){
-      this.productData = product;
-    }
-    else{
-      this.productData = null;
-    }
-    // this.productData = product ?? null;
+    this.productData = product || null;
     this.initializeForm();
     this.isActive = true;
   }
 
   initializeForm() {
-    if (this.productData) {
-      this.editProduct = {
-        id: this.productData.id || 0,
-        pricePerUnit: this.productData.pricePerUnit || 0,
-        status: this.productData.status,
-        quantity: this.productData.quantity
+      this.product = {
+        id: this.productData?.id || 0,
+        name : this.productData?.name || '',
+        description : this.productData?.description || '',
+        pricePerUnit: this.productData?.pricePerUnit || 0,
+        status: this.productData?.status || 1,
+        quantity: this.productData?.quantity || 0,
+        productCode : this.productData?.productCode || '',
+        createdBy : 1
       };
-    } else {
-      this.newProduct = {
-        name: '',
-        description: '',
-        pricePerUnit: 0,
-        status: 1,
-        quantity: 0,
-        productCode: '',
-        createdBy: 1
-      };
-    }
-  }
+    } 
 
-  submitForm() {
+  onSubmit() {
+    if (this.product.pricePerUnit <= 0) {
+        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Price must be greater than 0'});
+        return;
+      }
+      if (this.product.quantity <= 0) {
+        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Quantity must be greater than 0'});
+        return;
+      }
+       if(!this.product.name.trim()){
+        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Name is required'});
+        return;
+      }
+
     if (this.productData) {
-
-      if (this.editProduct.pricePerUnit <= 0) {
-        alert('Price must be greater than 0');
-        return;
-      }
-      if (this.editProduct.quantity <= 0) {
-        alert('Quantity cannot be negative');
-        return;
-      }
-      this.onSubmit.emit(this.editProduct);
+      this.productService.updateProduct(this.product as ProductUpdate)
+      .pipe(takeUntil(this.destroy))
+      .subscribe({
+        next: (response: ApiResponse<Product>) =>{
+          this.isActive = false;
+          this.onSubmitted.emit(response.data);
+          this.messageService.add({severity: 'success', summary: 'Updated', detail: 'Product updated successfully'});
+        },
+        error:(err) => {
+         this.messageService.add({severity: 'error', summary: 'Error', detail: err.message});
+        }   
+      });
     } else {
-
-      if(!this.newProduct.name.trim()){
-        alert('Name is required');
-        return;
-      }
-      this.onSubmit.emit(this.newProduct);
+      this.productService.insertProduct(this.product as ProductInsert)
+      .pipe(takeUntil(this.destroy))
+      .subscribe({
+        next: (response: ApiResponse<Product>) => {
+          this.isActive = false;
+          this.onSubmitted.emit(response.data);
+          this.messageService.add({severity: 'success', summary: 'Created', detail: 'Product created successfully'});
+        },
+        error: (err) => {
+          this.messageService.add({severity: 'error', summary: 'Error', detail: err.message});
+        }
+      });
     }
-    this.isActive = false;
   }
 
   cancelForm() {
     this.isActive = false;
   }
 
-}
+  ngOnDestroy() : void{
+    this.destroy.next();
+    this.destroy.complete();
+  }
+
+} 
+

@@ -4,22 +4,22 @@
     <h2>{{productData? 'Update Product' : 'Create Product' }} </h2>
     <ng-container *ngIf="!productData">
       <label>Name</label>
-      <input [(ngModel)]="newProduct.name" placeholder="Enter Name">
+      <input [(ngModel)]="product.name" placeholder="Enter Name">
 
       <label>Description</label>
-      <input [(ngModel)]="newProduct.description" placeholder="Enter Description">
+      <input [(ngModel)]="product.description" placeholder="Enter Description">
 
       <label>Product Code</label>
-      <input [(ngModel)]="newProduct.productCode" placeholder="Enter Product Code">
+      <input [(ngModel)]="product.productCode" placeholder="Enter Product Code">
 
       <label>Price Per Unit</label>
-      <input [(ngModel)]="newProduct.pricePerUnit" type="number" placeholder="Enter Price">
+      <input [(ngModel)]="product.pricePerUnit" type="number" placeholder="Enter Price">
 
       <label>Stocks</label>
-      <input [(ngModel)]="newProduct.quantity" type="number" placeholder="Enter Quantity">
+      <input [(ngModel)]="product.quantity" type="number" placeholder="Enter Quantity">
 
       <label>Status</label>
-      <select [(ngModel)]="newProduct.status">
+      <select [(ngModel)]="product.status">
         <option [ngValue]="1">In Stock</option>
         <option [ngValue]="2">Out of Stock</option>
         <option [ngValue]="3">Discontinued</option>
@@ -28,20 +28,20 @@
 
     <ng-container *ngIf="productData">
       <label> Price </label>
-      <input [(ngModel)]="editProduct.pricePerUnit" type="number">
+      <input [(ngModel)]="product.pricePerUnit" type="number">
 
       <label>Stocks</label>
-      <input [(ngModel)]="editProduct.quantity" type="number">
+      <input [(ngModel)]="product.quantity" type="number">
 
       <label> Status </label>
-      <select [(ngModel)]="editProduct.status">
+      <select [(ngModel)]="product.status">
         <option [ngValue]="1">In Stock</option>
         <option [ngValue]="2"> Out of stock</option>
         <option [ngValue]="3">Discontinued</option>
       </select>
     </ng-container>
 
-    <button (click)="submitForm()">Submit</button>
+    <button (click)="onSubmit()">Submit</button>
     <button (click)="cancelForm()">Cancel</button>
 
   </div>

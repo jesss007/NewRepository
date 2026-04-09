@@ -9,10 +9,13 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+
 @Component({
     selector: 'product',
     standalone: true,
-    imports: [CommonModule, FormsModule, ProductCreateEditComponent, TableModule, ButtonModule, InputTextModule],
+    imports: [CommonModule, FormsModule, ProductCreateEditComponent, TableModule, ButtonModule, InputTextModule, ToastModule],
     templateUrl: './product.component.html',
     styleUrls: ['./product.component.scss']
 })
@@ -26,7 +29,9 @@ export class ProductComponent implements OnInit, OnDestroy {
 
     filter: ProductFilter = { name: undefined };
 
-    constructor(private productService: ProductService) { }
+    constructor(private productService: ProductService,
+        private messageService : MessageService
+    ) { }
 
     ngOnInit() {
         this.loadProducts();
@@ -51,7 +56,7 @@ export class ProductComponent implements OnInit, OnDestroy {
                     this.totalRows = response.data.totalRows; // total rows  
                 },
                 error: (err) => {
-                    console.log(err.message);
+                   this.messageService.add({severity: 'error', summary: 'error', detail: err.message});
                 }
             });
     }
@@ -76,32 +81,13 @@ export class ProductComponent implements OnInit, OnDestroy {
         this.loadProducts();
     }
 
-    onSubmit(data: ProductInsert | ProductUpdate) {
-        if ((data as ProductUpdate).id) {  
-            this.productService.updateProduct(data as ProductUpdate)
-                .pipe(takeUntil(this.destroy))
-                .subscribe({
-                    next: (response: ApiResponse<Product>) => {
-                        const updated = response.data;
-                        const index = this.products.findIndex(p => p.id === updated.id);
-                        if (index === -1) return;
-                        this.products[index] = updated;
-                    },
-                    error: (err) => {
-                        console.log(err.message);
-                    }
-                });
-        } else {
-            this.productService.insertProduct(data as ProductInsert)
-                .pipe(takeUntil(this.destroy))
-                .subscribe({
-                    next: () => {
-                        this.loadProducts();
-                    },
-                    error: (err) => {
-                        console.log(err.message);
-                    }
-                });
+    onSubmitted(savedProduct: Product) {
+        const index = this.products.findIndex(p => p.id === savedProduct.id);
+        if (index !== -1) {
+            this.products[index] = savedProduct;
+        }
+        else {
+            this.products.push(savedProduct);
         }
     }
 
@@ -112,9 +98,10 @@ export class ProductComponent implements OnInit, OnDestroy {
                 .subscribe({
                     next: (response: ApiResponse<Product>) => {
                         this.products = this.products.filter(u => u.id !== response.data.id);
+                        this.messageService.add({severity: 'success', summary: 'Deleted', detail:'Product deleted successfully'});
                     },
                     error: (err) => {
-                        console.error(err.message);
+                        this.messageService.add({severity: 'error', summary: 'Error', detail: err.message});
                     }
                 });
         }
