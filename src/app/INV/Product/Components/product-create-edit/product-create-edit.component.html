@@ -1,4 +1,4 @@
-<p-overlay [visible]="isActive" (onHide)="cancelForm()">
+<p-overlay [visible]="isActive" (onHide)="onCancel()">
   <div class="modal">
 
     <h2>{{productData? 'Update Product' : 'Create Product' }} </h2>
@@ -42,7 +42,7 @@
     </ng-container>
 
     <button (click)="onSubmit()">Submit</button>
-    <button (click)="cancelForm()">Cancel</button>
+    <button (click)="onCancel()">Cancel</button>
 
   </div>
 </p-overlay>

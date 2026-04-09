@@ -1,7 +1,7 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Injector, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ProductService } from '../../Services/product.service';
-import { Product, ProductInsert, ProductUpdate, ProductFilter } from '../../Models/product';
+import { Product, ProductFilter } from '../../Models/product';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiResponse, MvGridConfig } from '../../../../shared/Models/response-model';
 import { ProductCreateEditComponent } from '../product-create-edit/product-create-edit.component';
@@ -10,17 +10,20 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
+import { AppComponent } from '../../../../app.component';
 
 @Component({
     selector: 'product',
     standalone: true,
-    imports: [CommonModule, FormsModule, ProductCreateEditComponent, TableModule, ButtonModule, InputTextModule, ToastModule],
+    imports: [CommonModule, FormsModule, ProductCreateEditComponent, TableModule, ButtonModule, InputTextModule, ToastModule, ConfirmDialogModule],
+    providers: [ConfirmationService],
     templateUrl: './product.component.html',
     styleUrls: ['./product.component.scss']
 })
 
-export class ProductComponent implements OnInit, OnDestroy {
+export class ProductComponent extends AppComponent implements OnInit, OnDestroy {
     private destroy = new Subject<void>();
     products: Product[] = [];
     currentPage = 1;
@@ -29,9 +32,10 @@ export class ProductComponent implements OnInit, OnDestroy {
 
     filter: ProductFilter = { name: undefined };
 
-    constructor(private productService: ProductService,
-        private messageService : MessageService
-    ) { }
+    constructor(injector: Injector, private productService: ProductService
+    ) {
+        super(injector);
+    }
 
     ngOnInit() {
         this.loadProducts();
@@ -56,11 +60,10 @@ export class ProductComponent implements OnInit, OnDestroy {
                     this.totalRows = response.data.totalRows; // total rows  
                 },
                 error: (err) => {
-                   this.messageService.add({severity: 'error', summary: 'error', detail: err.message});
+                    this.showMessage('Error', 'error',  err.message);
                 }
             });
     }
-
 
     onFilter() {
         this.currentPage = 1;
@@ -81,30 +84,39 @@ export class ProductComponent implements OnInit, OnDestroy {
         this.loadProducts();
     }
 
-    onSubmitted(savedProduct: Product) {
-        const index = this.products.findIndex(p => p.id === savedProduct.id);
+    onSubmit(submitProduct: Product) {
+        const index = this.products.findIndex(p => p.id === submitProduct.id);
         if (index !== -1) {
-            this.products[index] = savedProduct;
+            this.products[index] = submitProduct;
         }
         else {
-            this.products.push(savedProduct);
+            this.products.push(submitProduct);
         }
     }
 
     onDelete(product: Product) {
-        if (confirm('Are you sure you want to delete this product?')) {
-            this.productService.deleteProduct({ id: product.id, deletedBy: 1 })
-                .pipe(takeUntil(this.destroy))
-                .subscribe({
-                    next: (response: ApiResponse<Product>) => {
-                        this.products = this.products.filter(u => u.id !== response.data.id);
-                        this.messageService.add({severity: 'success', summary: 'Deleted', detail:'Product deleted successfully'});
-                    },
-                    error: (err) => {
-                        this.messageService.add({severity: 'error', summary: 'Error', detail: err.message});
-                    }
-                });
-        }
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete this product',
+            header: 'Delete Confirmation',
+            accept: () => {
+                this.productService.deleteProduct({ id: product.id, deletedBy: 1 })
+                    .pipe(takeUntil(this.destroy))
+                    .subscribe({
+                        next: (response: ApiResponse<Product>) => {
+                            this.products = this.products.filter(u => u.id !== response.data.id);
+                            this.showMessage( 'Deleted', 'Product deleted successfully', 'success');
+                        },
+                        error: (err) => {
+                            this.showMessage( 'error', 'Error',  err.message );
+                        }
+                    });
+
+            },
+            reject: () => {
+                this.showMessage( 'Cancel','Product deletion cancelled','info');
+            }
+
+        });
 
     }
 
@@ -112,4 +124,8 @@ export class ProductComponent implements OnInit, OnDestroy {
         this.destroy.next();
         this.destroy.complete();
     }
+}
+
+function Super(injector: Injector) {
+    throw new Error('Function not implemented.');
 }
