@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="page">
     <div class="header">
         <h1> Products </h1>
@@ -72,5 +73,5 @@
 </div>
 <p-confirmDialog />
 
-<product-create-edit #productcreateedit (onSubmit)="onSubmit($event)">
+<product-create-edit #productcreateedit (onSave)="onSave($event)">
 </product-create-edit>

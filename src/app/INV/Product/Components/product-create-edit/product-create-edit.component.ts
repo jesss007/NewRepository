@@ -1,36 +1,33 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, EventEmitter, OnDestroy, OnInit, Output, Injector } from '@angular/core';
 import { Product, ProductInsert, ProductUpdate } from '../../Models/product';
-import { OverlayModule } from 'primeng/overlay';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiResponse } from '../../../../shared/Models/response-model';
 import { ProductService } from '../../Services/product.service';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { AppComponent } from '../../../../app.component';
+import { primeNgImports } from '../../../../shared/prime-ng-imports';
+import { sharedImports } from '../../../../shared/shared-imports';
 
 @Component({
   selector: 'product-create-edit',
   standalone: true,
-  imports: [CommonModule, FormsModule, OverlayModule, ToastModule],
+  imports: [primeNgImports, sharedImports],
   templateUrl: './product-create-edit.component.html',
   styleUrls: ['./product-create-edit.component.scss']
 })
-export class ProductCreateEditComponent implements OnInit, OnDestroy {
+export class ProductCreateEditComponent extends AppComponent implements OnInit, OnDestroy {
 
   private destroy = new Subject<void>();
 
-  @Output() onSubmitted = new EventEmitter<Product>();
+  @Output() onSave = new EventEmitter<Product>();
 
   productData: Product | null = null;
   isActive: boolean = false;
 
   product: Product = new Product();
 
-  constructor(
-    private productService: ProductService,
-    private messageService: MessageService
-  ) { }
+  constructor(injector: Injector, private productService: ProductService) {
+    super(injector);
+  }
 
   ngOnInit() {
 
@@ -55,30 +52,26 @@ export class ProductCreateEditComponent implements OnInit, OnDestroy {
   }
 
   onSubmit() {
-    if (this.product.pricePerUnit <= 0) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Price must be greater than 0' });
-      return;
-    }
-    if (this.product.quantity <= 0) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Quantity must be greater than 0' });
-      return;
-    }
     if (!this.product.name.trim()) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Name is required' });
+      this.showMessage('Error', 'Name is required', 'error');
       return;
     }
 
+    if (this.product.pricePerUnit <= 0) {
+      this.showMessage('Error', 'Price must be greater than 0', 'error');
+      return;
+    }
     if (this.productData) {
       this.productService.updateProduct(this.product as ProductUpdate)
         .pipe(takeUntil(this.destroy))
         .subscribe({
           next: (response: ApiResponse<Product>) => {
             this.isActive = false;
-            this.onSubmitted.emit(response.data);
-            this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Product updated successfully' });
+            this.onSave.emit(response.data);
+            this.showMessage('Updated', 'Product updated successfully', 'success');
           },
           error: (err) => {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
+            this.showMessage('Error', err.message, 'error');
           }
         });
     } else {
@@ -87,18 +80,18 @@ export class ProductCreateEditComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (response: ApiResponse<Product>) => {
             this.isActive = false;
-            this.onSubmitted.emit(response.data);
-            this.messageService.add({ severity: 'success', summary: 'Created', detail: 'Product created successfully' });
+            this.onSave.emit(response.data);
+            this.showMessage('Created', 'Product created successfully', 'success');
           },
           error: (err) => {
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
+            this.showMessage('Error', err.message, 'error');
           }
         });
     }
   }
 
   onCancel() {
-    this.isActive = false;
+    this.isActive = false;   
   }
 
   ngOnDestroy(): void {
