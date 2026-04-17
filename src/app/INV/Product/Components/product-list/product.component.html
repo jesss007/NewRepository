@@ -1,75 +1,147 @@
 <p-toast></p-toast>
 <div class="page">
-    <div class="header">
-        <h1> Products </h1>
-        <p-button label="Create Product" (onClick)="productcreateedit.show()" />
-
+  <div class="header">
+    <h1>Products</h1>
+    <div class="buttons">
+      <button
+        pButton
+        icon="pi pi-plus"
+        label="Create"
+        class="p-button-sm"
+        (click)="productcreateedit.show()"
+      ></button>
     </div>
+  </div>
 
-    <div>
-        <input pInputText placeholder="Search by name" [(ngModel)]="filter.name" />
-        <p-button label="Search" (onClick)="onFilter()" />
-        <p-button label="Clear" severity="secondary" (onClick)="onClearFilter()" />
+  <div class="filter-bar">
+    <input
+      pInputText
+      type="text"
+      placeholder="Search.."
+      [(ngModel)]="filter.search"
+    />
+
+    <p-dropdown
+      [options]="statusOptions"
+      [(ngModel)]="filter.status"
+      placeholder="Status"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+    />
+
+    <button
+      pButton
+      icon="pi pi-search"
+      label="Search"
+      class="p-button"
+      (click)="onFilter()"
+    ></button>
+
+    <button
+      pButton
+      icon="pi pi-filter-slash"
+      label="Clear"
+      class="p-button-rounded p-button-secondary"
+      (click)="onClearFilter()"
+    ></button>
+  </div>
+
+  <p-table [value]="products">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="name">
+          Name <p-sortIcon field="name"></p-sortIcon>
+        </th>
+        <th pSortableColumn="sku">SKU <p-sortIcon field="sku"></p-sortIcon></th>
+        <th pSortableColumn="productCode">
+          Product Code <p-sortIcon field="productCode"></p-sortIcon>
+        </th>
+        <th pSortableColumn="category">
+          Category<p-sortIcon field="category"></p-sortIcon>
+        </th>
+        <th pSortableColumn="status">
+          Status <p-sortIcon field="status"></p-sortIcon>
+        </th>
+
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-product>
+      <tr>
+        <td>{{ product.name }}</td>
+        <td>{{ product.sku }}</td>
+        <td>{{ product.productCode }}</td>
+        <td>{{ product.category }}</td>
+        <td>
+          <span
+            [class]="
+              product.status === 1
+                ? 'For sale'
+                : product.status === 2
+                  ? 'Not for sale'
+                  : 'On Hold'
+            "
+          >
+            {{
+              product.status === 1
+                ? "For Sale"
+                : product.status === 2
+                  ? "Not for Sale"
+                  : "On Hold"
+            }}
+          </span>
+        </td>
+        <td>
+          <div class="action-buttons">
+            <button
+              pButton
+              icon="pi pi-pencil"
+              class="p-button-text p-button-sm"
+              pTooltip="Edit"
+              tooltipPosition="top"
+              (click)="productcreateedit.show(product)"
+            ></button>
+
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-text p-button-sm p-button-danger"
+              pTooltip="Delete"
+              tooltipPosition="top"
+              (click)="onDelete(product)"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td>No products found</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <div class="pagination-wrapper">
+    <div class="info">
+      Showing {{ offset + 1 }} to {{ offset + products.length }} of
+      {{ totalRows }} products
     </div>
-
-
-    <p-table [value]="products">
-        <ng-template pTemplate="header">
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price Per Unit</th>
-                <th>Status</th>
-                <th>Stocks</th>
-                <th>Product Code</th>
-                <th>Actions</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-product>
-            <tr>
-                <td>{{product.id}}</td>
-                <td>{{product.name}}</td>
-                <td>{{product.description}}</td>
-                <td>{{product.pricePerUnit}}</td>
-                <td><span [class]="product.status === 1 ? 'inStock' 
-                        : product.status === 2 ? 'outOfStock' 
-                        :'discontinued'">
-                        {{ product.status === 1 ? 'In Stock'
-                        : product.status === 2 ? 'Out of Stock'
-                        : 'Discontinued' }}
-                    </span>
-                </td>
-                <td>{{product.quantity}}</td>
-                <td>{{product.productCode}}</td>
-                <td>
-                    <p-button label="Edit" (onClick)="productcreateedit.show(product)" />
-                    <p-button label="Delete" severity="danger" (onClick)="onDelete(product)" />
-                </td>
-
-            </tr>
-        </ng-template>
-    </p-table>
-
-
-    <div class="pagination-wrapper">
-
-        <div class="info">
-            Showing {{offset + 1}} to {{offset + products.length}} of {{totalRows}} products
-        </div>
-        <div class="pagination">
-            <p-button label="Prev" (onClick)="onPageChange(currentPage - 1)"
-                [attr.disabled]="currentPage === 1 ? true : null" />
-            <span>Page {{currentPage}} of {{totalPages}}</span>
-            <p-button label="Next" (onClick)="onPageChange(currentPage + 1)"
-                [attr.disabled]="currentPage === totalPages ? true : null" />
-        </div>
-
-
+    <div class="pagination">
+      <p-button
+        label="Prev"
+        (onClick)="onPageChange(currentPage - 1)"
+        [attr.disabled]="currentPage === 1 ? true : null"
+      />
+      <span>Page {{ currentPage }} of {{ totalPages}}</span>
+      <p-button
+        label="Next"
+        (onClick)="onPageChange(currentPage + 1)"
+        [attr.disabled]="currentPage === totalPages ? true : null"
+      />
     </div>
-
-
-
+  </div>
 </div>
 <p-confirmDialog />
 

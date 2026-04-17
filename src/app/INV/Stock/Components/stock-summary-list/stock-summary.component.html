@@ -1,0 +1,70 @@
+<p-toast></p-toast>
+
+<div class="page">
+  <div class="header">
+    <h1>Stock Summary</h1>
+
+    <div class="button">
+      <p-button label="Add Stock Summary" (click)="stocksummarycreate.show()" />
+    </div>
+  </div>
+
+  <p-table [value]="stockSummary">
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="createdAt">
+          Date <p-sortIcon field="createdAt"></p-sortIcon>
+        </th>
+        <th pSortableColumn="productName">
+          Name <p-sortIcon field="productName"></p-sortIcon>
+        </th>
+        <th pSortableColumn="productCode">
+          Product Code<p-sortIcon field="productCode"></p-sortIcon>
+        </th>
+        <th pSortableColumn="sku">SKU<p-sortIcon field="sku"></p-sortIcon></th>
+        <th pSortableColumn="stockType">
+          Stock Type<p-sortIcon field="stockType"></p-sortIcon>
+        </th>
+        <th pSortableColumn="quantity">
+          Quantity<p-sortIcon field="quantity"></p-sortIcon>
+        </th>
+        <th pSortableColumn="balanceQuantity">
+          Balance Quantity<p-sortIcon field="balanceQuantity"></p-sortIcon>
+        </th>
+        <th pSortableColumn="remarks">
+          Remarks <p-sortIcon field="remarks"></p-sortIcon>
+        </th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-stock>
+      <tr>
+        <td>{{ stock.createdAt }}</td>
+        <td>{{ stock.productName }}</td>
+        <td>{{ stock.productCode }}</td>
+        <td>{{ stock.sku }}</td>
+        <td>{{ stock.stockType }}</td>
+        <td>{{ stock.quantity }}</td>
+        <td>{{ stock.balanceQuantity }}</td>
+        <td>{{ stock.remarks }}</td>
+        <td>
+          <button
+            pButton
+            icon="pi pi-history"
+            class="p-button-text"
+            pTooltip="View History"
+            tooltipPosition="top"
+            (click)="stockhistory.show(stock.productId)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+<stock-history #stockhistory></stock-history>
+<stock-summary-create
+  #stocksummarycreate
+  (onSave)="onSave($event)"
+></stock-summary-create>

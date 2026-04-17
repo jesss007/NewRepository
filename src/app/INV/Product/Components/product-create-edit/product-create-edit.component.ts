@@ -1,37 +1,44 @@
-import { Component, EventEmitter, OnDestroy, OnInit, Output, Injector } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  OnDestroy,
+  OnInit,
+  Output,
+  Injector,
+} from '@angular/core';
 import { Product, ProductInsert, ProductUpdate } from '../../Models/product';
 import { Subject, takeUntil } from 'rxjs';
 import { ApiResponse } from '../../../../shared/Models/response-model';
 import { ProductService } from '../../Services/product.service';
 import { AppComponent } from '../../../../app.component';
-import { primeNgImports } from '../../../../shared/prime-ng-imports';
-import { sharedImports } from '../../../../shared/shared-imports';
+import { sharedImports } from '../../../../shared/Imports/shared-imports';
 
 @Component({
   selector: 'product-create-edit',
   standalone: true,
-  imports: [primeNgImports, sharedImports],
+  imports: [sharedImports],
   templateUrl: './product-create-edit.component.html',
-  styleUrls: ['./product-create-edit.component.scss']
+  styleUrls: ['./product-create-edit.component.scss'],
 })
-export class ProductCreateEditComponent extends AppComponent implements OnInit, OnDestroy {
-
-  private destroy = new Subject<void>();
-
+export class ProductCreateEditComponent
+  extends AppComponent
+  implements OnInit, OnDestroy
+{
   @Output() onSave = new EventEmitter<Product>();
 
-  productData: Product | null = null;
+  private destroy = new Subject<void>();
   isActive: boolean = false;
-
+  productData: Product | null = null;
   product: Product = new Product();
 
-  constructor(injector: Injector, private productService: ProductService) {
+  constructor(
+    injector: Injector,
+    private productService: ProductService,
+  ) {
     super(injector);
   }
 
-  ngOnInit() {
-
-  }
+  ngOnInit() {}
 
   show(product?: Product) {
     this.productData = product || null;
@@ -43,11 +50,10 @@ export class ProductCreateEditComponent extends AppComponent implements OnInit, 
     this.product = {
       id: this.productData?.id || 0,
       name: this.productData?.name || '',
-      description: this.productData?.description || '',
-      pricePerUnit: this.productData?.pricePerUnit || 0,
-      status: this.productData?.status || 1,
-      quantity: this.productData?.quantity || 0,
+      sku: this.productData?.sku || '',
       productCode: this.productData?.productCode || '',
+      category : this.productData?.category || '',
+      status: this.productData?.status || 1,
     };
   }
 
@@ -56,48 +62,51 @@ export class ProductCreateEditComponent extends AppComponent implements OnInit, 
       this.showMessage('Error', 'Name is required', 'error');
       return;
     }
-
-    if (this.product.pricePerUnit <= 0) {
-      this.showMessage('Error', 'Price must be greater than 0', 'error');
-      return;
-    }
     if (this.productData) {
-      this.productService.updateProduct(this.product as ProductUpdate)
+      this.productService
+        .updateProduct(this.product as ProductUpdate)
         .pipe(takeUntil(this.destroy))
         .subscribe({
           next: (response: ApiResponse<Product>) => {
             this.isActive = false;
             this.onSave.emit(response.data);
-            this.showMessage('Updated', 'Product updated successfully', 'success');
+            this.showMessage(
+              'Updated',
+              'Product updated successfully',
+              'success',
+            );
           },
           error: (err) => {
             this.showMessage('Error', err.message, 'error');
-          }
+          },
         });
     } else {
-      this.productService.insertProduct(this.product as ProductInsert)
+      this.productService
+        .insertProduct(this.product as ProductInsert)
         .pipe(takeUntil(this.destroy))
         .subscribe({
           next: (response: ApiResponse<Product>) => {
             this.isActive = false;
             this.onSave.emit(response.data);
-            this.showMessage('Created', 'Product created successfully', 'success');
+            this.showMessage(
+              'Created',
+              'Product created successfully',
+              'success',
+            );
           },
           error: (err) => {
             this.showMessage('Error', err.message, 'error');
-          }
+          },
         });
     }
   }
 
   onCancel() {
-    this.isActive = false;   
+    this.isActive = false;
   }
 
   ngOnDestroy(): void {
     this.destroy.next();
     this.destroy.complete();
   }
-
 }
-

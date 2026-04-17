@@ -1,11 +1,12 @@
 import { Component, Injector } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { NavBarComponent } from './shared/NavBar/nav-bar.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [NavBarComponent, RouterOutlet],
   providers: [MessageService, ConfirmationService],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],

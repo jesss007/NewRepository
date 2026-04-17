@@ -1,0 +1,25 @@
+<p-overlay [visible]="isActive">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2>Create Opening balance</h2>
+
+    <p-dropdown
+      [options]="products"
+      optionLabel="name"
+      optionValue="id"
+      [(ngModel)]="openingBalance.productId"
+      placeholder="Select a product"
+      appendTo="body"
+    >
+    </p-dropdown>
+    
+    <label> Quantity </label>
+    <input
+      [(ngModel)]="openingBalance.quantity"
+      type="number"
+      placeholder="Enter quantity"
+    />
+
+    <button (click)="onSubmit()">Submit</button>
+    <button (click)="onCancel()">Cancel</button>
+  </div>
+</p-overlay>

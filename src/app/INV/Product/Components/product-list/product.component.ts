@@ -1,21 +1,20 @@
 import { Component, Injector, OnDestroy, OnInit } from '@angular/core';
 import { ProductService } from '../../Services/product.service';
 import { Subject, takeUntil } from 'rxjs';
-import { ApiResponse, MvGridConfig } from '../../../../shared/Models/response-model';
+import {
+  ApiResponse,
+  MvGridConfig,
+} from '../../../../shared/Models/response-model';
 import { ProductCreateEditComponent } from '../product-create-edit/product-create-edit.component';
 import { AppComponent } from '../../../../app.component';
 import { Product, ProductFilter } from '../../Models/product';
-import { primeNgImports } from '../../../../shared/prime-ng-imports';
-import { sharedImports } from '../../../../shared/shared-imports';
+import { sharedImports } from '../../../../shared/Imports/shared-imports';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'product',
   standalone: true,
-  imports: [
-    sharedImports,
-    primeNgImports,
-    ProductCreateEditComponent,
-  ],
+  imports: [sharedImports, ProductCreateEditComponent],
   templateUrl: './product.component.html',
   styleUrls: ['./product.component.scss'],
 })
@@ -26,14 +25,25 @@ export class ProductComponent
   private destroy = new Subject<void>();
   products: Product[] = [];
   currentPage = 1;
-  pageSize = 5;
+  pageSize = 7;
   totalRows = 0;
 
-  filter: ProductFilter = { name: undefined };
+  filter: ProductFilter = {
+    search: undefined,
+    status: undefined,
+  };
+
+  statusOptions = [
+    { label: 'All Status', value: null },
+    { label: 'For Sale', value: 1 },
+    { label: 'Not For Sale', value: 2 },
+    { label: 'On Hold', value: 3 },
+  ];
 
   constructor(
     injector: Injector,
     private productService: ProductService,
+    private router: Router,
   ) {
     super(injector);
   }
@@ -58,7 +68,7 @@ export class ProductComponent
       .pipe(takeUntil(this.destroy))
       .subscribe({
         next: (response: ApiResponse<MvGridConfig<Product>>) => {
-          this.products = response.data.data; // the actual products
+          this.products = response.data.data ?? []; // the actual products
           this.totalRows = response.data.totalRows; // total rows
         },
         error: (err) => {
@@ -73,7 +83,10 @@ export class ProductComponent
   }
 
   onClearFilter() {
-    this.filter = { name: undefined };
+    this.filter = {
+      search: undefined,
+      status: undefined,
+    };
     this.currentPage = 1;
     this.loadProducts();
   }
@@ -88,13 +101,16 @@ export class ProductComponent
 
   onSave(submitProduct: Product) {
     const index = this.products.findIndex((p) => p.id === submitProduct.id);
+
     if (index !== -1) {
       this.products[index] = submitProduct;
-    } else {
-      this.products.push(submitProduct);
+      return;
+    }
+
+    if (this.products.length < this.pageSize) {
+      this.products[this.products.length] = submitProduct;
     }
   }
-
   onDelete(product: Product) {
     this.confirmAction({
       message: 'Are you sure you want to delete this product',
@@ -131,6 +147,4 @@ export class ProductComponent
   }
 }
 
-// function Super(injector: Injector) {
-//     throw new Error('Function not implemented.');
-// }
+

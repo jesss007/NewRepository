@@ -1,0 +1,42 @@
+<p-overlay [visible]="isActive">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <h2>Create Stock Summary</h2>
+
+    <p-dropdown
+      [options]="products"
+      optionLabel="name"
+      optionValue="id"
+      [(ngModel)]="stockSummary.productId"
+      placeholder="Select a product"
+      appendTo="body"
+    >
+    </p-dropdown>
+
+    <p-dropdown
+      [options]="stockTypes"
+      optionLabel="label"
+      optionValue="value"
+      [(ngModel)]="stockSummary.stockType"
+      placeholder="Stock type"
+      appendTo="body"
+    >
+    </p-dropdown>
+
+    <label>Quantity</label>
+    <input
+      [(ngModel)]="stockSummary.quantity"
+      type="number"
+      placeholder="Enter quantity"
+    />
+
+    <label>Remarks</label>
+    <input
+      [(ngModel)]="stockSummary.remarks"
+      type="text"
+      placeholder="Enter remarks"
+    />
+
+    <button (click)="onSubmit()">Submit</button>
+    <button (click)="onCancel()">Cancel</button>
+  </div>
+</p-overlay>

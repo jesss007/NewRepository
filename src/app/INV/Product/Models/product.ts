@@ -1,11 +1,10 @@
 export class Product {
   id: number;
   name: string;
-  description: string;
-  pricePerUnit: number;
-  status: number;
-  quantity: number;
+  sku: string;
   productCode: string;
+  category : string;
+  status: number;
   createdAt?: Date;
   updatedAt?: Date;
   createdBy?: number;
@@ -18,11 +17,10 @@ export class Product {
   constructor() {
     this.id = 0;
     this.name = '';
-    this.description = '';
-    this.pricePerUnit = 0;
-    this.status = 0;
-    this.quantity = 0;
+    this.sku = '',
     this.productCode = '';
+    this.category = '';
+    this.status = 0;
     this.createdAt = new Date();
     // optional fields can remain undefined
   }
@@ -32,27 +30,33 @@ export class Product {
 }
 
 export interface ProductFilter {
-  name? : string
+  search? : string;
+  status? : number | null;
 }
 
 export interface ProductInsert{
-    name : string,
-    description : string,
-    pricePerUnit : number,
-    status : number,
-    quantity : number,
-    productCode : string,
-    createdBy? : number,   
+    name : string;
+    sku : string;
+    category : string;
+    status : number;
+    productCode : string;
+    createdBy? : number;   
 }
 
 export interface ProductUpdate {
   id: number;
-  pricePerUnit: number;
+  name: string;
+  sku: string;
   status: number;
-  quantity: number;
+  updatedBy: number;
 }
 
 export interface ProductDelete {
   id: number;
-  deletedBy : number
+  deletedBy : number;
+}
+
+export interface ProductDropdown {
+  id: number;
+  name: string;
 }

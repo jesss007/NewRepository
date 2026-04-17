@@ -6,38 +6,39 @@
       <label>Name</label>
       <input [(ngModel)]="product.name" placeholder="Enter Name">
 
-      <label>Description</label>
-      <input [(ngModel)]="product.description" placeholder="Enter Description">
+      <label>SKU</label>
+      <input [(ngModel)]="product.sku" placeholder="Enter SKU">
 
       <label>Product Code</label>
-      <input [(ngModel)]="product.productCode" placeholder="Enter Product Code">
+      <input [(ngModel)]="product.productCode" placeholder="Auto-Generated" [disabled]="true">
 
-      <label>Price Per Unit</label>
-      <input [(ngModel)]="product.pricePerUnit" type="number" placeholder="Enter Price">
-
-      <label>Stocks</label>
-      <input [(ngModel)]="product.quantity" type="number" placeholder="Enter Quantity">
+      <label>Category</label>
+      <select [(ngModel)]="product.category" > 
+        <option value="" disabled> Select Category </option>
+        <option value="Electronics"> Electronics </option>
+        <option value="Accessories"> Accessories </option>
+        <option value="Audio"> Audio </option>
+      </select>
 
       <label>Status</label>
       <select [(ngModel)]="product.status">
-        <option [ngValue]="1">In Stock</option>
-        <option [ngValue]="2">Out of Stock</option>
-        <option [ngValue]="3">Discontinued</option>
+        <option [ngValue]="1">For Sale</option>
+        <option [ngValue]="2">Not for sale</option>
+        <option [ngValue]="3">On Hold</option>
       </select>
     </ng-container>
 
     <ng-container *ngIf="productData">
-      <label> Price </label>
-      <input [(ngModel)]="product.pricePerUnit" type="number">
+      <label> Name </label>
+      <input [(ngModel)]="product.name" type="text">
 
-      <label>Stocks</label>
-      <input [(ngModel)]="product.quantity" type="number">
-
+      <label> SKU </label>
+      <input [(ngModel)]="product.sku" type="text">
       <label> Status </label>
       <select [(ngModel)]="product.status">
-        <option [ngValue]="1">In Stock</option>
-        <option [ngValue]="2"> Out of stock</option>
-        <option [ngValue]="3">Discontinued</option>
+        <option [ngValue]="1">For Sale</option>
+        <option [ngValue]="2">Not for Sale</option>
+        <option [ngValue]="3">On Hold</option>
       </select>
     </ng-container>
 
